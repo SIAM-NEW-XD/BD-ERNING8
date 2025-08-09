@@ -1,0 +1,105 @@
+<!doctype html>
+<html lang="bn">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width,initial-scale=1" />
+  <title>ERNING-BD</title>
+
+  <!-- Font Awesome (optional) -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css"/>
+
+  <!-- Local CSS -->
+  <link rel="stylesheet" href="css/styles.css" />
+</head>
+<body>
+  <!-- External scripts that were in original file -->
+  <script src="https://telegram.org/js/telegram-web-app.js"></script>
+  <script src="//data159.click/857c15758fe4399080eb/dae27d95cd/?placementName=default"></script>
+
+  <!-- App container -->
+  <div class="container">
+    <main id="main-content">
+      <!-- HOME VIEW -->
+      <div id="home-view" class="view active">
+        <div class="user-header-card">
+          <div class="user-avatar" id="profile-pic">EE</div>
+          <div class="user-info">
+            <h2 class="username" id="username">Loading...</h2>
+            <p class="title">Welcome Back!</p>
+          </div>
+        </div>
+
+        <div class="balance-card">
+          <p class="label">Total Balance</p>
+          <h1 class="balance-value" id="balance-value">৳0.00</h1>
+          <p class="points-value"><i class="fa-solid fa-coins"></i> <span id="points-value"></span> Points</p>
+        </div>
+
+        <h2 class="section-title">Quick Actions</h2>
+
+        <div class="task-card" onclick="showView('tasks-view')">
+          <div class="task-icon"><i class="fa-solid fa-list-check"></i></div>
+          <div class="task-details"><h3>View Tasks</h3><p>Watch ads and complete tasks to earn points.</p></div>
+          <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+
+        <div class="task-card" onclick="openWithdrawModal()">
+          <div class="task-icon"><i class="fa-solid fa-wallet"></i></div>
+          <div class="task-details"><h3>Withdraw Funds</h3><p>Request to withdraw your available balance.</p></div>
+          <div class="task-arrow"><i class="fa-solid fa-chevron-right"></i></div>
+        </div>
+      </div>
+
+      <!-- TASKS VIEW -->
+      <div id="tasks-view" class="view">
+        <h2 class="section-title">Earning Tasks</h2>
+        <div class="task-card" onclick="showRewardedInterstitial()">
+          <div class="task-icon"><i class="fa-solid fa-rectangle-ad"></i></div>
+          <div class="task-details"><h3>Rewarded Interstitial</h3><p>Watch a full-screen ad to earn rewards.</p></div>
+          <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+        </div>
+        <div class="task-card" onclick="showRewardedPopup()">
+          <div class="task-icon"><i class="fa-solid fa-window-restore"></i></div>
+          <div class="task-details"><h3>Rewarded Popup</h3><p>View a popup ad for quick points.</p></div>
+          <div class="task-arrow"><i class="fa-solid fa-play"></i></div>
+        </div>
+      </div>
+
+      <!-- LEADERBOARD VIEW -->
+      <div id="leaderboard-view" class="view">
+        <h2 class="section-title">Top Earners</h2>
+        <div id="leaderboard-list"></div>
+      </div>
+
+      <!-- HISTORY VIEW -->
+      <div id="history-view" class="view">
+        <h2 class="section-title">Recent Activity</h2>
+        <div id="history-list"></div>
+      </div>
+    </main>
+
+    <nav class="footer-nav">
+      <button class="nav-button active" onclick="showView('home-view')"><i class="icon fa-solid fa-house"></i>Home</button>
+      <button class="nav-button" onclick="showView('tasks-view')"><i class="icon fa-solid fa-list-check"></i>Tasks</button>
+      <button class="nav-button" onclick="showView('leaderboard-view')"><i class="icon fa-solid fa-trophy"></i>Leaders</button>
+      <button class="nav-button" onclick="showView('history-view')"><i class="icon fa-solid fa-clock-rotate-left"></i>History</button>
+      <button class="nav-button" onclick="shareApp()"><i class="icon fa-solid fa-share-nodes"></i>Share</button>
+    </nav>
+  </div>
+
+  <!-- WITHDRAWAL MODAL -->
+  <div class="modal-overlay" id="withdraw-modal">
+    <div class="modal-content">
+      <h3>Confirm Withdrawal</h3>
+      <p>You are about to request a withdrawal of your entire balance. Please confirm.</p>
+      <div class="modal-actions">
+        <button class="action-button secondary-button" onclick="closeWithdrawModal()">Cancel</button>
+        <button class="action-button primary-button" id="confirm-withdraw-btn">Confirm</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- Local JS -->
+  <script src="js/app.js"></script>
+</body>
+</html>
