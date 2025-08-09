@@ -1,6 +1,4 @@
-// app.js  (moved from original bot.html)
-// NOTE: DO NOT commit real botToken into public repo.
-// Use a serverless function / backend endpoint to send messages to Telegram.
+// app.js
 
 let points = 0;
 let balance = 0.00;
@@ -9,18 +7,16 @@ let tgUser = null;
 const pointsPerAd = 1;
 const ratePerPoint = 5.05;
 
-// Config: replace BACKEND_SEND_WITHDRAW_URL with your backend URL that will forward message to Telegram bot.
-// e.g. https://your-server.example.com/send-telegram (POST { chat_id, text })
+// Set this to your backend endpoint that will send message to Telegram bot
 const BACKEND_SEND_WITHDRAW_URL = "REPLACE_WITH_YOUR_BACKEND_ENDPOINT";
 
-// Load Monetag SDK for new ads
+// Load Monetag SDK
 const monetagScript = document.createElement('script');
 monetagScript.src = '//libtl.com/sdk.js';
 monetagScript.dataset.zone = '9690276';
 monetagScript.dataset.sdk = 'show_9690276';
 document.head.appendChild(monetagScript);
 
-// DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
   document.getElementById('confirm-withdraw-btn').addEventListener('click', requestWithdraw);
@@ -31,8 +27,10 @@ function initApp() {
     try {
       Telegram.WebApp.ready();
       Telegram.WebApp.expand();
-      tgUser = Telegram.WebApp.initDataUnsafe && Telegram.WebApp.initDataUnsafe.user ? Telegram.WebApp.initDataUnsafe.user : null;
-    } catch (e) { console.warn("Telegram WebApp init error:", e); }
+      tgUser = Telegram.WebApp.initDataUnsafe?.user || null;
+    } catch (e) {
+      console.warn("Telegram WebApp init error:", e);
+    }
   }
   loadData();
   loadTelegramUser();
@@ -41,34 +39,30 @@ function initApp() {
   initializeInAppAds();
 }
 
-// Initialize new Monetag Ads
 function initializeInAppAds() {
   if (typeof show_9690276 === 'function') {
-    // Auto interstitial ad on load
     show_9690276({
       type: 'inApp',
       inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false }
     });
-    console.log("Automatic In-App Interstitial Ads Initialized.");
+    console.log("In-App Ads Initialized.");
   } else {
-    console.warn("Monetag SDK not ready for In-App Ads.");
+    console.warn("Monetag SDK not ready.");
   }
 }
 
-// View navigation
 function showView(viewId) {
   document.querySelectorAll('.view').forEach(v => v.classList.remove('active'));
-  const el = document.getElementById(viewId);
-  if (el) el.classList.add('active');
+  document.getElementById(viewId)?.classList.add('active');
 
   document.querySelectorAll('.nav-button').forEach(btn => btn.classList.remove('active'));
-  const activeBtn = Array.from(document.querySelectorAll('.nav-button')).find(b => b.getAttribute('onclick') && b.getAttribute('onclick').includes(viewId));
-  if (activeBtn) activeBtn.classList.add('active');
+  const activeBtn = Array.from(document.querySelectorAll('.nav-button'))
+    .find(b => b.getAttribute('onclick')?.includes(viewId));
+  activeBtn?.classList.add('active');
 
   if (viewId === 'history-view') renderHistory();
 }
 
-// Persistence
 function loadData() {
   const saved = localStorage.getItem('easyEarningBotV2');
   if (saved) {
@@ -79,15 +73,16 @@ function loadData() {
   }
   updateDisplay();
 }
+
 function saveData() {
   localStorage.setItem('easyEarningBotV2', JSON.stringify({ points, balance, historyLog }));
 }
+
 function updateDisplay() {
   document.getElementById('points-value').textContent = points;
   document.getElementById('balance-value').textContent = `৳${balance.toFixed(2)}`;
 }
 
-// Telegram user info
 function loadTelegramUser() {
   if (tgUser) {
     document.getElementById('username').textContent = tgUser.first_name || 'Telegram User';
@@ -98,26 +93,27 @@ function loadTelegramUser() {
       profilePicDiv.textContent = (tgUser.first_name || 'U').charAt(0);
     }
   } else {
-    // fallback text
     document.getElementById('username').textContent = 'Guest';
   }
 }
 
-// History
 function addToHistory(type, detail) {
   const timestamp = new Date().toISOString();
   historyLog.unshift({ type, detail, timestamp });
   if (historyLog.length > 50) historyLog.pop();
   saveData();
 }
+
 function renderHistory() {
   const list = document.getElementById('history-list');
-  if (!historyLog || historyLog.length === 0) {
+  if (!historyLog.length) {
     list.innerHTML = `<div class="list-item"><div class="info"><div class="name">No activity yet.</div><div class="detail">Watch some ads to get started!</div></div></div>`;
     return;
   }
   list.innerHTML = historyLog.map(item => {
-    const icon = item.type === 'earn' ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary-color);"></i>' : '<i class="fa-solid fa-paper-plane" style="color: var(--accent-color);"></i>';
+    const icon = item.type === 'earn'
+      ? '<i class="fa-solid fa-plus-circle" style="color: var(--primary-color);"></i>'
+      : '<i class="fa-solid fa-paper-plane" style="color: var(--accent-color);"></i>';
     return `
       <div class="list-item">
         <div class="history-icon">${icon}</div>
@@ -129,7 +125,6 @@ function renderHistory() {
   }).join('');
 }
 
-// Leaderboard (static sample)
 function renderLeaderboard() {
   const leaderboardData = [
     { name: "CryptoKing", score: 2540, avatar: "https://i.pravatar.cc/150?img=1" },
@@ -140,58 +135,60 @@ function renderLeaderboard() {
   ];
   document.getElementById('leaderboard-list').innerHTML = leaderboardData.map((u, idx) => `
     <div class="list-item">
-      <div class="rank">#${idx+1}</div>
+      <div class="rank">#${idx + 1}</div>
       <img src="${u.avatar}" class="avatar" alt="Avatar">
       <div class="info"><div class="name">${u.name}</div></div>
       <div class="score">${u.score} pts</div>
     </div>`).join('');
 }
 
-// Earning logic
 function grantReward() {
   points += pointsPerAd;
   balance = points * ratePerPoint;
   updateDisplay();
   addToHistory('earn', `+${pointsPerAd} Point(s) from Ad`);
   saveData();
-  try { Telegram.WebApp.HapticFeedback.notificationOccurred('success'); } catch(e){}
+  try { Telegram.WebApp.HapticFeedback.notificationOccurred('success'); } catch { }
   alert(`Congratulations! You've earned +${pointsPerAd} point. Your new balance is ৳${balance.toFixed(2)}.`);
 }
 
-// Show Interstitial Ad (click)
 function showRewardedInterstitial() {
   if (typeof show_9690276 !== 'function') return alert('Ad provider is not ready.');
   try {
-    show_9690276().then(grantReward).catch(e => alert('Ad could not be shown.'));
-  } catch (e) { alert('Ad SDK error'); }
+    show_9690276().then(grantReward).catch(() => alert('Ad could not be shown.'));
+  } catch {
+    alert('Ad SDK error');
+  }
 }
 
-// Show Popup Ad (click)
 function showRewardedPopup() {
   if (typeof show_9690276 !== 'function') return alert('Ad provider is not ready.');
   try {
-    show_9690276('pop').then(grantReward).catch(e => alert('Ad could not be shown.'));
-  } catch (e) { alert('Ad SDK error'); }
+    show_9690276('pop').then(grantReward).catch(() => alert('Ad could not be shown.'));
+  } catch {
+    alert('Ad SDK error');
+  }
 }
 
-// Withdrawal
 function openWithdrawModal() {
-  if (balance < 5) {
-    try { Telegram.WebApp.HapticFeedback.notificationOccurred('error'); } catch(e){}
+  if (balance < 1000) {
+    try { Telegram.WebApp.HapticFeedback.notificationOccurred('error'); } catch { }
     return alert("Minimum withdrawal amount is ৳1000. Keep earning!");
   }
   document.getElementById('withdraw-modal').classList.add('active');
 }
+
 function closeWithdrawModal() {
   document.getElementById('withdraw-modal').classList.remove('active');
 }
+
 async function requestWithdraw() {
   closeWithdrawModal();
   const userInfo = tgUser ? `@${tgUser.username || ''} (ID: ${tgUser.id || 'N/A'})` : 'Unknown User';
   const message = `💸 *Withdrawal Request*\n\n👤 *User:* ${userInfo}\n💰 *Amount:* ৳${balance.toFixed(2)}\n\n_Please process this request._`;
 
   if (!BACKEND_SEND_WITHDRAW_URL || BACKEND_SEND_WITHDRAW_URL.includes("REPLACE")) {
-    alert("Withdraw endpoint not configured. Configure BACKEND_SEND_WITHDRAW_URL in js/app.js.");
+    alert("Withdraw endpoint not configured.");
     return;
   }
 
@@ -203,29 +200,28 @@ async function requestWithdraw() {
     });
     const data = await res.json();
     if (data.ok) {
-      try { Telegram.WebApp.HapticFeedback.notificationOccurred('success'); } catch(e){}
+      try { Telegram.WebApp.HapticFeedback.notificationOccurred('success'); } catch { }
       alert("Your withdrawal request has been sent successfully!");
       addToHistory('withdraw', `Request for ৳${balance.toFixed(2)}`);
     } else {
-      try { Telegram.WebApp.HapticFeedback.notificationOccurred('error'); } catch(e){}
-      alert("Failed to send request. Please try again later.");
+      try { Telegram.WebApp.HapticFeedback.notificationOccurred('error'); } catch { }
+      alert("Failed to send request.");
     }
   } catch (err) {
-    try { Telegram.WebApp.HapticFeedback.notificationOccurred('error'); } catch(e){}
-    alert("An error occurred. Check your connection and try again.");
+    try { Telegram.WebApp.HapticFeedback.notificationOccurred('error'); } catch { }
+    alert("An error occurred. Please try again.");
     console.error(err);
   }
 }
 
-// Share
 function shareApp() {
   if (!tgUser) return alert("Could not get user data from Telegram.");
-  const botUsername = "erningbdpey_bot"; // change if needed
+  const botUsername = "erningbdpey_bot";
   const referralLink = `https://t.me/${botUsername}?start=${tgUser.id || ''}`;
   const text = `🎉 Join this amazing bot and start earning! Use my link to get a special bonus:\n\n${referralLink}`;
   if (navigator.share) {
-    navigator.share({ title: 'Earn', text, url: referralLink }).catch(()=>{});
+    navigator.share({ title: 'Earn', text, url: referralLink }).catch(() => { });
   } else {
-    navigator.clipboard?.writeText(text).then(()=>alert('Referral link copied to clipboard.'));
+    navigator.clipboard?.writeText(text).then(() => alert('Referral link copied to clipboard.'));
   }
 }
