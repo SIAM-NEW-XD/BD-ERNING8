@@ -8,7 +8,7 @@ let balance = 0.00;
 let historyLog = [];
 let tgUser = null;
 const pointsPerAd = 1;
-const ratePerPoint = 1000.5;
+const ratePerPoint = 1050.5;
 
 // Backend URL for sending Telegram withdraw messages
 const BACKEND_SEND_WITHDRAW_URL = "https://t.me/HINCOMEBD"; // তোর API URL বসাবি এখানে
