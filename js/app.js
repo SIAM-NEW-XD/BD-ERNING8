@@ -13,6 +13,13 @@ const ratePerPoint = 5.05;
 // e.g. https://your-server.example.com/send-telegram (POST { chat_id, text })
 const BACKEND_SEND_WITHDRAW_URL = "REPLACE_WITH_YOUR_BACKEND_ENDPOINT";
 
+// Load Monetag SDK for new ads
+const monetagScript = document.createElement('script');
+monetagScript.src = '//libtl.com/sdk.js';
+monetagScript.dataset.zone = '9690276';
+monetagScript.dataset.sdk = 'show_9690276';
+document.head.appendChild(monetagScript);
+
 // DOM ready
 document.addEventListener('DOMContentLoaded', () => {
   initApp();
@@ -34,17 +41,17 @@ function initApp() {
   initializeInAppAds();
 }
 
-// Try initialize monetag in-app ads (original used show_9168587)
+// Initialize new Monetag Ads
 function initializeInAppAds() {
-  if (typeof show_9168587 === 'function') {
-    show_9168587({
+  if (typeof show_9690276 === 'function') {
+    // Auto interstitial ad on load
+    show_9690276({
       type: 'inApp',
       inAppSettings: { frequency: 2, capping: 0.1, interval: 30, timeout: 5, everyPage: false }
     });
     console.log("Automatic In-App Interstitial Ads Initialized.");
   } else {
     console.warn("Monetag SDK not ready for In-App Ads.");
-    // optional: retry logic removed for static host
   }
 }
 
@@ -140,7 +147,7 @@ function renderLeaderboard() {
     </div>`).join('');
 }
 
-// Earning logic (simulate)
+// Earning logic
 function grantReward() {
   points += pointsPerAd;
   balance = points * ratePerPoint;
@@ -150,17 +157,20 @@ function grantReward() {
   try { Telegram.WebApp.HapticFeedback.notificationOccurred('success'); } catch(e){}
   alert(`Congratulations! You've earned +${pointsPerAd} point. Your new balance is ৳${balance.toFixed(2)}.`);
 }
+
+// Show Interstitial Ad (click)
 function showRewardedInterstitial() {
-  if (typeof show_9168587 !== 'function') return alert('Ad provider is not ready.');
-  // original used promise style: show_9168587().then(grantReward)
+  if (typeof show_9690276 !== 'function') return alert('Ad provider is not ready.');
   try {
-    show_9168587().then(grantReward).catch(e => alert('Ad could not be shown.'));
+    show_9690276().then(grantReward).catch(e => alert('Ad could not be shown.'));
   } catch (e) { alert('Ad SDK error'); }
 }
+
+// Show Popup Ad (click)
 function showRewardedPopup() {
-  if (typeof show_9168587 !== 'function') return alert('Ad provider is not ready.');
+  if (typeof show_9690276 !== 'function') return alert('Ad provider is not ready.');
   try {
-    show_9168587('pop').then(grantReward).catch(e => alert('Ad could not be shown.'));
+    show_9690276('pop').then(grantReward).catch(e => alert('Ad could not be shown.'));
   } catch (e) { alert('Ad SDK error'); }
 }
 
@@ -177,7 +187,6 @@ function closeWithdrawModal() {
 }
 async function requestWithdraw() {
   closeWithdrawModal();
-  // Send withdraw request to backend to forward to admin via Telegram bot safely
   const userInfo = tgUser ? `@${tgUser.username || ''} (ID: ${tgUser.id || 'N/A'})` : 'Unknown User';
   const message = `💸 *Withdrawal Request*\n\n👤 *User:* ${userInfo}\n💰 *Amount:* ৳${balance.toFixed(2)}\n\n_Please process this request._`;
 
@@ -214,7 +223,6 @@ function shareApp() {
   const botUsername = "erningbdpey_bot"; // change if needed
   const referralLink = `https://t.me/${botUsername}?start=${tgUser.id || ''}`;
   const text = `🎉 Join this amazing bot and start earning! Use my link to get a special bonus:\n\n${referralLink}`;
-  // copy to clipboard or use share API
   if (navigator.share) {
     navigator.share({ title: 'Earn', text, url: referralLink }).catch(()=>{});
   } else {
