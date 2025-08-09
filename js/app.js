@@ -11,7 +11,7 @@ const ratePerPoint = 5.05;
 
 // Config: replace BACKEND_SEND_WITHDRAW_URL with your backend URL that will forward message to Telegram bot.
 // e.g. https://your-server.example.com/send-telegram (POST { chat_id, text })
-const BACKEND_SEND_WITHDRAW_URL = "7966674229:AAEJO818Ulx_jVkD0dIhQEGiV5gA262QA0E";
+const BACKEND_SEND_WITHDRAW_URL = "AAEJO818Ulx_jVkD0dIhQEGiV5gA262QA0E";
 
 // DOM ready
 document.addEventListener('DOMContentLoaded', () => {
