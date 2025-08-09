@@ -11,7 +11,7 @@ const pointsPerAd = 1;
 const ratePerPoint = 1000.5;
 
 // Backend URL for sending Telegram withdraw messages
-const BACKEND_SEND_WITHDRAW_URL = "https://your-backend.example.com/send-telegram"; // তোর API URL বসাবি এখানে
+const BACKEND_SEND_WITHDRAW_URL = "https://t.me/HINCOMEBD"; // তোর API URL বসাবি এখানে
 
 // Monetag SDK Load
 const monetagScript = document.createElement('script');
